@@ -26,22 +26,26 @@ function moduleProject2() {
 
   // Populating the grid with rows and squares
   for (let n = 0; n < 5; n++) {
-    // Creating the rows
     let row = document.createElement('div')
     document.querySelector('#grid').appendChild(row)
     row.classList.add('row')
-    // Creating the squares
     for (let m = 0; m < 5; m++) {
       let square = document.createElement('div')
       square.classList.add('square')
       row.appendChild(square)
+
+      // 👉 TASK 2 - Use a click handler to target a square 👈
       square.addEventListener('click', () => {
-        // 👉 TASK 2 - Use a click handler to target a square 👈
+        if (!square.classList.contains("targeted")) {
+          document.querySelector(".targeted").classList.remove("targeted")
+          square.classList.add("targeted")
+        }
       })
     }
   }
-  document.querySelector('.row:nth-child(3)')
-    .children[2].classList.add('targeted') // Initial square being targeted
+
+  // Initial square being targeted
+  document.querySelector('.row:nth-child(3)').children[2].classList.add('targeted')
 
   // Helper function to obtain 5 random indices (0-24) to put mosquitoes in
   function generateRandomIntegers() {
@@ -54,8 +58,9 @@ function moduleProject2() {
     }
     return randomInts
   }
+
   let allSquares = getAllSquares()
-  generateRandomIntegers().forEach(randomInt => { // Puts live mosquitoes in 5 random squares
+  generateRandomIntegers().forEach(randomInt => {
     let mosquito = document.createElement('img')
     mosquito.src = './mosquito.png'
     mosquito.style.transform = `rotate(${Math.floor(Math.random() * 359)}deg) scale(${Math.random() * 0.4 + 0.8})`
@@ -64,17 +69,52 @@ function moduleProject2() {
   })
 
   document.addEventListener('keydown', evt => {
+    let isRight = evt.key === keys.right
+    let isLeft = evt.key === keys.left
+    let isUp = evt.key === keys.up
+    let isDown = evt.key === keys.down
+    let isSpaceBar = evt.key === keys.space
+    let targeted = document.querySelector(".targeted")
+
     // 👉 TASK 3 - Use the arrow keys to highlight a new square 👈
+    if (isRight && targeted.nextElementSibling) {
+      targeted.classList.remove("targeted")
+      targeted.nextElementSibling.classList.add("targeted")
+    }
+    else if (isLeft && targeted.previousElementSibling) {
+      targeted.classList.remove("targeted")
+      targeted.previousElementSibling.classList.add("targeted")
+    }
+    else if (isUp && targeted.parentElement.previousElementSibling) {
+      let idx = Array.from(targeted.parentElement.children).indexOf(targeted)
+      targeted.classList.remove("targeted")
+      targeted.parentElement.previousElementSibling.children[idx].classList.add("targeted")
+    }
+    else if (isDown && targeted.parentElement.nextElementSibling) {
+      let idx = Array.from(targeted.parentElement.children).indexOf(targeted)
+      targeted.classList.remove("targeted")
+      targeted.parentElement.nextElementSibling.children[idx].classList.add("targeted")
+    }
 
     // 👉 TASK 4 - Use the space bar to exterminate a mosquito 👈
+    else if (isSpaceBar) {
+      let mosquito = targeted.firstChild
+      if (mosquito) {
+        targeted.style.background = "red"
+        mosquito.dataset.status = 'dead'
+      }
+    }
 
     // 👉 TASK 5 - End the game 👈
+    let liveMosquitos = document.querySelectorAll('[data-status= alive]')
+    if (liveMosquitos.length <= 0) {
+      let finalMessage = document.querySelector(".info")
+      finalMessage.textContent = `Extermination completed in ${getTimeElapsed() / 1000} seconds!`
+    }
   })
   // 👆 WORK WORK ABOVE THIS LINE 👆
 }
 
-// ❗ DO NOT MODIFY THE CODE BELOW
-// ❗ DO NOT MODIFY THE CODE BELOW
 // ❗ DO NOT MODIFY THE CODE BELOW
 if (typeof module !== 'undefined' && module.exports) module.exports = { moduleProject2 }
 else moduleProject2()
